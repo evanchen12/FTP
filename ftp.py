@@ -70,10 +70,10 @@ if len(sys.argv) == 3:
   host = re.search(r'@(.*?):', ftp).group(1)
   path = ftp.split("/", 3)[-1]
 
-  # Open client socket
+  # open client socket
   cSock = login(ftp)
 
-  # Command handling
+  # command handling
   if cmd == "ls":
     protocol(cSock, host, "LIST " + path)
   elif cmd == "rm":
@@ -88,7 +88,7 @@ if len(sys.argv) == 3:
   else: 
     print("Error")
   
-  # Closing sockets
+  # closing sockets
   send(cSock, "QUIT")
   cSock.close()
   
@@ -106,10 +106,10 @@ elif len(sys.argv) == 4:
   host = re.search(r'@(.*?):', ftp).group(1)
   path = ftp.split("/", 3)[-1]
   
-  # Open client socket
+  # open client socket
   cSock = login(ftp)
   
-  # Command handling
+  # command handling
   if ftl:
     # copy from ftp to local
     dSock = openData(cSock, host)
@@ -117,14 +117,17 @@ elif len(sys.argv) == 4:
     print(msg)
     data = dSock.recv(2048)
     print(data)
+
+    # write to local
     file = open(local)
     file.write(data.decode("utf-8"))
     file.close()
+    
     dSock.close()
     msg = cSock.recv(2048)
     print(msg)
 
-    # If mv then delete the original
+    # if mv then delete the original
     if cmd == "mv":
       msg = send(cSock, "DELE " + path)
       print(msg)
@@ -140,7 +143,7 @@ elif len(sys.argv) == 4:
     msg = cSock.recv(2048)
     print(msg)
     
-    # If mv then delete the original
+    # if mv then delete the original
     if cmd == "mv":
       msg = send(cSock, "DELE " + path)
       print(msg)
