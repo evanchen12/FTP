@@ -119,8 +119,8 @@ elif len(sys.argv) == 4:
     print(data)
 
     # write to local
-    file = open(local)
-    file.write(data.decode("utf-8"))
+    file = open(local, "wb")
+    file.write(data)
     file.close()
     
     dSock.close()
@@ -153,4 +153,3 @@ elif len(sys.argv) == 4:
   cSock.close()
 else:
   print("Bye")
-
