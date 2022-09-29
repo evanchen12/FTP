@@ -1,1 +1,5 @@
-# FTP
+# I seperated the commands to 2 types 2 arguments and 3 arguments. The first argument will always be the command and the second are the ftp path or local path. To handle  it I have 2 cases to handle the 2 situation. For the 3 arguments I had a block to that correctly identify ftp and local path as well as the direction of the command.  The ftp arguments are parsed with regex and string splits. For each command I have a if cases that would send the responding protocol to the server by using a helper function. I also created a helper function that opens a data channel for protocols that requires them such as (cp, mv, ls). Every interaction with the server would receive message from the server and printed out. After the protocol is finished data channel would close if it was opend before and finally closing the client socket. 
+
+# One of the major challenges that I faced is parsing the ftp argument, which I had to resort to using regex. Another is that I mistakely opened data channel for protocol that doesn't need it and had to reread the assignement to figure out why DELE, RMD, etc wasn't working. And finally another major challenge is sending and recieving files from the server.
+
+# I mainly test the server by using my given credential and testing the various command on my given server. 
