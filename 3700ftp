@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import socket
 import sys
+import os
 import re
-
-# Send and receive protocol"
+# ftp://chenev:eRg7sBjYSP5bX9qti8AO@ftp.3700.network/
+# Send and receive commands"
 def send(sock, msg):
   msg = msg + "\r\n"
   sock.send(msg.encode("utf-8"))
@@ -16,29 +17,24 @@ def login(ftp):
   password = re.search(r':(.*?)@', ftp).group(1)
   password = re.search('(?<=:).*', password).group(0)
   host = re.search(r'@(.*?)(/|:)', ftp).group(1)
+  
   port = ftp.split(":", 3)[-1]
   port = port.split("/")[0]
-  
+
   if (len(port) > 3):
     port = "21"
   
   cSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   ip = socket.gethostbyname(host)
   cSock.connect((ip, int(port)))
-  msg = cSock.recv(2048)
-  print(msg)
+  print(cSock.recv(2048))
 
   # Set the server up
-  msg = send(cSock, "USER " + username)
-  print(msg)
-  msg = send(cSock, "PASS " + password)
-  print(msg)
-  msg = send(cSock, "TYPE I")
-  print(msg)
-  msg = send(cSock, "MODE S")
-  print(msg)
-  msg = send(cSock, "STRU F")
-  print(msg)
+  print(send(cSock, "USER " + username))
+  print(send(cSock, "PASS " + password))
+  print(send(cSock, "TYPE I"))
+  print(send(cSock, "MODE S"))
+  print(send(cSock, "STRU F"))
 
   return cSock
 
@@ -56,16 +52,13 @@ def openData(cSock, host):
   dSock.connect((ip, port))
   return dSock
 
-# Run a command
+# Send a command that need to open a data channel
 def protocol(cSock, host, fullCommand):
   dSock = openData(cSock, host)
-  msg = send(cSock, fullCommand)
-  print(msg)
-  msg = dSock.recv(2048)
-  print(msg)
+  print(send(cSock, fullCommand))
+  print(dSock.recv(2048))
   dSock.close()
-  msg = cSock.recv(2048)
-  print(msg)
+  print(cSock.recv(2048))
   
 ###############################################################################
 if len(sys.argv) == 3:
@@ -81,14 +74,11 @@ if len(sys.argv) == 3:
   if cmd == "ls":
     protocol(cSock, host, "LIST " + path)
   elif cmd == "rm":
-    msg = send(cSock, "DELE " + path)
-    print(msg)
+    print(send(cSock, "DELE " + path))
   elif cmd == "mkdir":
-    msg = send(cSock, "MKD " + path)
-    print(msg)
+    print(send(cSock, "MKD " + path))
   elif cmd == "rmdir":
-    msg = send(cSock, "RMD " + path)
-    print(msg)
+    print(send(cSock, "RMD " + path))
   else: 
     print("Error")
   
@@ -102,11 +92,11 @@ elif len(sys.argv) == 4:
   if "ftp" in sys.argv[2]:
     ftp = sys.argv[2]
     local = sys.argv[3]
-    ftl = True
+    ftpToLocal = True
   else:
     ftp = sys.argv[3]
     local = sys.argv[2]
-    ftl = False
+    ftpToLocal = False
   host = re.search(r'@(.*?)(/|:)', ftp).group(1)
   path = ftp.split("/", 3)[-1]
   
@@ -114,11 +104,10 @@ elif len(sys.argv) == 4:
   cSock = login(ftp)
   
   # command handling
-  if ftl:
+  if ftpToLocal:
     # copy from ftp to local
     dSock = openData(cSock, host)
-    msg = send(cSock, "RETR " + path)
-    print(msg)
+    print(send(cSock, "RETR " + path))
     data = dSock.recv(2048)
     print(data)
 
@@ -128,29 +117,24 @@ elif len(sys.argv) == 4:
     file.close()
     
     dSock.close()
-    msg = cSock.recv(2048)
-    print(msg)
+    print(cSock.recv(2048))
 
     # if mv then delete the original
     if cmd == "mv":
-      msg = send(cSock, "DELE " + path)
-      print(msg)
+      print(send(cSock, "DELE " + path))
   else:
     # copy file from local to ftp 
     file = open(local)
     data = file.read()
     dSock = openData(cSock, host)
-    msg = send(cSock, "STOR " + path)
-    print(msg)
-    dSock.send(data.encode("utf-8"))
+    print(send(cSock, "STOR " + path))
+    dSock.send(data.encode("ascii"))
     dSock.close()
-    msg = cSock.recv(2048)
-    print(msg)
+    print(cSock.recv(2048))
     
     # if mv then delete the original
     if cmd == "mv":
-      msg = send(cSock, "DELE " + path)
-      print(msg)
+      os.remove(local)
       
   # Closing sockets
   send(cSock, "QUIT")
