@@ -3,7 +3,7 @@ import socket
 import sys
 import os
 import re
-# ftp://chenev:eRg7sBjYSP5bX9qti8AO@ftp.3700.network/
+
 # Send and receive commands"
 def send(sock, msg):
   msg = msg + "\r\n"
@@ -124,11 +124,11 @@ elif len(sys.argv) == 4:
       print(send(cSock, "DELE " + path))
   else:
     # copy file from local to ftp 
-    file = open(local)
+    file = open(local, "rb")
     data = file.read()
     dSock = openData(cSock, host)
     print(send(cSock, "STOR " + path))
-    dSock.send(data.encode("ascii"))
+    dSock.send(data)
     dSock.close()
     print(cSock.recv(2048))
     
