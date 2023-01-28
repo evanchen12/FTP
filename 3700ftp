@@ -8,7 +8,7 @@ import re
 def send(sock, msg):
   msg = msg + "\r\n"
   sock.send(msg.encode("utf-8"))
-  receive = sock.recv(1024).decode("utf-8")
+  receive = sock.recv(8192).decode("utf-8")
   return receive
 
 # Set up the the socket connection 
@@ -27,7 +27,7 @@ def login(ftp):
   cSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   ip = socket.gethostbyname(host)
   cSock.connect((ip, int(port)))
-  print(cSock.recv(2048))
+  print(cSock.recv(8192))
 
   # Set the server up
   print(send(cSock, "USER " + username))
@@ -56,9 +56,9 @@ def openData(cSock, host):
 def protocol(cSock, host, fullCommand):
   dSock = openData(cSock, host)
   print(send(cSock, fullCommand))
-  print(dSock.recv(2048))
+  print(dSock.recv(8192))
   dSock.close()
-  print(cSock.recv(2048))
+  print(cSock.recv(8192))
   
 ###############################################################################
 if len(sys.argv) == 3:
@@ -108,7 +108,7 @@ elif len(sys.argv) == 4:
     # copy from ftp to local
     dSock = openData(cSock, host)
     print(send(cSock, "RETR " + path))
-    data = dSock.recv(2048)
+    data = dSock.recv(8192)
     print(data)
 
     # write to local
@@ -117,7 +117,7 @@ elif len(sys.argv) == 4:
     file.close()
     
     dSock.close()
-    print(cSock.recv(2048))
+    print(cSock.recv(8192))
 
     # if mv then delete the original
     if cmd == "mv":
@@ -129,8 +129,9 @@ elif len(sys.argv) == 4:
     dSock = openData(cSock, host)
     print(send(cSock, "STOR " + path))
     dSock.send(data)
+    
     dSock.close()
-    print(cSock.recv(2048))
+    print(cSock.recv(8192))
     
     # if mv then delete the original
     if cmd == "mv":
